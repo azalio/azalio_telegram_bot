@@ -1,0 +1,20 @@
+{
+  "telegram": {
+    "key": "YOUR_KEY",
+    "user_id": YOUR_ID
+  },
+  "lepra": {
+    "sites": [
+      "baraholka",
+      "idiod"
+    ],
+    "db_name" : "lepra",
+    "uid": "YOUR_ID",
+    "sid": "YOUR_SID"
+  },
+  "instagram": {
+    "accounts": [
+      "nakedfeed"
+    ]
+  }
+}
