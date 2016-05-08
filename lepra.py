@@ -4,6 +4,7 @@ import requests
 from fake_useragent import UserAgent
 from BeautifulSoup import BeautifulSoup
 import re
+import sys
 import mongo
 import telegramm_bot
 import config
@@ -34,24 +35,28 @@ def clear_post(post):
     post = post.replace('</a>', ' ')
     post = post.replace('" height=.*/>', ' ')
     post = post.replace('" width=.*/>', ' ')
+    post = post.replace('"width=.*/>', ' ')
     post = post.replace('<span class="', ' ')
     post = post.replace('</span>', ' ')
     post = post.replace('< >', '\n')
     post = post.replace('<i>', ' ')
     post = post.replace('</i>', ' ')
     post = post.replace('" alt="image', ' ')
+    post = post.replace('" />', ' ')
     post = re.sub(r'<a target="_blank" href="', ' ', post)
     post = re.sub(r'<img src="', ' ', post)
     post = re.sub(r'" width="[0-9]+" height="[0-9]+" />', ' ', post)
     post = re.sub(r'<img .*src="', ' ', post)
-    post = re.sub(r'" title=.*KB', ' ', post)
+    post = re.sub(r'" title=.*[KM]B', ' ', post)
     post = re.sub(r'" rel="youtube".*data-start_time="0', ' ', post)
     post = re.sub(r'" alt=".*kb', ' ', post)
+    post = re.sub(r'" data-imgur_id=.*data-start_time="[0-9]+', ' ', post)
+    post = re.sub(r'" alt=.*height="[0-9]+', ' ', post)
+    post = re.sub(r' <div class="b-external_image.*media.giphy.com', ' ', post)
 
     return post
 
 
-# sites = ['baraholka', 'idiod']
 sites = config.conf['lepra']['sites']
 db_name = config.conf['lepra']['db_name']
 
@@ -62,17 +67,23 @@ for site in sites:
     soup = BeautifulSoup(html)
     results = soup.findAll("div", {"class": re.compile("^(post.*)$")})
     for post_html in results:
-        post = post_html.find('div', {'class': 'dti p_body'})
-        url = post_html.find('span', {'class': 'b-post_comments_links'}).a.get('href')
+        try:
+            post = post_html.find('div', {'class': 'dti p_body'})
+            post_num = re.match(r'<div class="post.*"? id="p([0-9]+)" data', str(post_html))
+            post_num = post_num.group(1)
+            url = "https://{}.leprosorium.ru/comments/{}/".format(site, post_num)
+            # url = post_html.find('span', {'class': 'b-post_comments_links'}).a.get('href')
 
-        post = str(post)
-        post = clear_post(post)
-        url = 'https:' + url
-        id = mongo.ObjectId(str(url[-1:-13:-1]))
-        if mongo.check_id(id, collection):
-            post_json = {"_id": id,
-                         "url": url,
-                         "post": post}
-            collection.insert_one(post_json)
-            post = str(post) + '\n' + str(url)
-            telegramm_bot.send_message(post, type='text')
+            post = str(post)
+            post = clear_post(post)
+            # url = 'https:' + url
+            id = mongo.ObjectId(str(url[-1:-13:-1]))
+            if mongo.check_id(id, collection):
+                post_json = {"_id": id,
+                             "url": url,
+                             "post": post}
+                collection.insert_one(post_json)
+                post = str(post) + '\n' + str(url)
+                telegramm_bot.send_message(post, type='text')
+        except:
+            raise
