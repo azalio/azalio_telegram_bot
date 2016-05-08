@@ -45,7 +45,8 @@ def main():
                     with open(path, 'wb') as f:
                         for chunk in media.iter_content(1024):
                             f.write(chunk)
-                        telegramm_bot.send_message(path, type='photo')
+                        # telegramm_bot.send_message(path, type='photo')
+                        telegramm_bot.send_message(insta_url, type='text')
 
 
 if __name__ == '__main__':

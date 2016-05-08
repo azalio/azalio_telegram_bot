@@ -12,7 +12,7 @@ def send_message(data, type):
     if type == 'text':
         bot.sendMessage(USER_ID, data)
     if type == 'photo':
-        data = open(data, 'r')
+        data = open(data, 'r', 0)
         bot.sendPhoto(USER_ID, data)
 
 

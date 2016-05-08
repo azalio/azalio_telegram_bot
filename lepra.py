@@ -57,7 +57,9 @@ def clear_post(post):
     post = re.sub(r' <div class="b-external_image.*media.giphy.com', ' ', post)
     post = re.sub(r'" border="[0-9]', ' ', post)
     post = re.sub(r'" width=.*px', ' ', post)
-
+    post = re.sub(r'" data-start_time="[0-9]+', ' ', post)
+    post = re.sub(r'title="', ' ', post)
+    post = re.sub(r'" rel="coub".*data-start_time="[0-9]+', ' ', post)
     return post
 
 
