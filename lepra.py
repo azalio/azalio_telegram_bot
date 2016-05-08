@@ -43,9 +43,10 @@ def clear_post(post):
     post = post.replace('</i>', ' ')
     post = post.replace('" alt="image', ' ')
     post = post.replace('" />', ' ')
+    post = re.sub(r'" border="[0-9]', ' ', post)
     post = re.sub(r'<a target="_blank" href="', ' ', post)
     post = re.sub(r'<img src="', ' ', post)
-    post = re.sub(r'" width="[0-9]+" height="[0-9]+"', ' ', post)
+    post = re.sub(r'" width="[0-9]+" height="[0-9]+"?', ' ', post)
     post = re.sub(r'<img .*src="', ' ', post)
     post = re.sub(r'" title=.*[KM]B', ' ', post)
     post = re.sub(r'" rel="youtube".*data-start_time="0', ' ', post)
@@ -54,6 +55,8 @@ def clear_post(post):
     post = re.sub(r'" data-imgur_id=.*data-start_time="[0-9]+', ' ', post)
     post = re.sub(r'" alt=.*height="[0-9]+', ' ', post)
     post = re.sub(r' <div class="b-external_image.*media.giphy.com', ' ', post)
+    post = re.sub(r'" border="[0-9]', ' ', post)
+    post = re.sub(r'" width=.*px', ' ', post)
 
     return post
 
