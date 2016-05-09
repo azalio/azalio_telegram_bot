@@ -18,7 +18,13 @@ def get_posts(site):
     sid = config.conf['lepra']['sid']
     cookies = {'uid': uid, 'sid': sid}
     url = 'https://{0}.leprosorium.ru/'.format(site)
-    r = requests.get(url, headers=headers, cookies=cookies)
+    try:
+        r = requests.get(url, headers=headers, cookies=cookies)
+    except requests.exceptions.RequestException as e:
+        post = 'requests raise exception!\n' + str(url) + '\n' + str(e)
+        telegramm_bot.send_message(post, type='text')
+        return False
+
     if r.status_code == 200:
         return r.text
 
@@ -41,6 +47,8 @@ def clear_post(post):
     post = post.replace('< >', '\n')
     post = post.replace('<i>', ' ')
     post = post.replace('</i>', ' ')
+    post = post.replace('<p>', ' ')
+    post = post.replace('</p>', ' ')
     post = post.replace('" alt="image', ' ')
     post = post.replace('" />', ' ')
     post = re.sub(r'" border="[0-9]', ' ', post)
@@ -60,6 +68,7 @@ def clear_post(post):
     post = re.sub(r'" data-start_time="[0-9]+', ' ', post)
     post = re.sub(r'title="', ' ', post)
     post = re.sub(r'" rel="coub".*data-start_time="[0-9]+', ' ', post)
+    post = re.sub(r' rel="coub".*data-preview_height="[0-9]+', ' ', post)
     return post
 
 
@@ -70,6 +79,8 @@ for site in sites:
     client, db, collection = mongo.mongo_connect(db_name, site)
 
     html = get_posts(site)
+    if not html:
+        continue
     soup = BeautifulSoup(html)
     results = soup.findAll("div", {"class": re.compile("^(post.*)$")})
     for post_html in results:
